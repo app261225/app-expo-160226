@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "fcm-push-demo",
+    "slug": "fcm-push-demo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+
+    "plugins": [
+      "expo-dev-client",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1A73E8",
+          "sounds": [],
+          "androidMode": "default",
+          "androidCollapsedTitle": "%(unread_notifications)d new interactions",
+          "iosDisplayInForeground": true
+        }
+      ]
+    ],
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "android": {
+      "googleServicesFile": "./google-services.json",
+      "package": "com.app220226.fcmpushdemo",
+      "permissions": ["NOTIFICATIONS", "VIBRATE", "RECEIVE_BOOT_COMPLETED"],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
