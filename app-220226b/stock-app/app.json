@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "fcm-push-demo",
-    "slug": "fcm-push-demo",
-    "scheme": "fcm-push-demo",
+    "name": "stock-app",
+    "slug": "stock-app",
+    "scheme": "stock-app",
     "version": "1.0.0",
     "platforms": [
       "android"

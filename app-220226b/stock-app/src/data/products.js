@@ -1,0 +1,42 @@
+export const PRODUCTS = [
+  {
+    id: '1',
+    name: 'Beras Premium 5kg',
+    sku: 'BRS-001',
+    stock: 42,
+    unit: 'karung',
+    category: 'Sembako',
+  },
+  {
+    id: '2',
+    name: 'Minyak Goreng 2L',
+    sku: 'MNY-001',
+    stock: 18,
+    unit: 'botol',
+    category: 'Sembako',
+  },
+  {
+    id: '3',
+    name: 'Gula Pasir 1kg',
+    sku: 'GLA-001',
+    stock: 5,
+    unit: 'bungkus',
+    category: 'Sembako',
+  },
+  {
+    id: '4',
+    name: 'Sabun Cuci Piring',
+    sku: 'SBN-001',
+    stock: 0,
+    unit: 'botol',
+    category: 'Kebersihan',
+  },
+  {
+    id: '5',
+    name: 'Deterjen Bubuk 1kg',
+    sku: 'DTJ-001',
+    stock: 23,
+    unit: 'bungkus',
+    category: 'Kebersihan',
+  },
+];
