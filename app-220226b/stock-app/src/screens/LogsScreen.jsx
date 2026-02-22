@@ -1,12 +1,11 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LogsScreen() {
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       <Text style={styles.pageTitle}>Log Aktivitas</Text>
       <Text style={styles.empty}>Belum ada aktivitas stok.</Text>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { PRODUCTS } from '../data/products';
 
 function SummaryCard({ label, value, color }) {
@@ -12,22 +11,25 @@ function SummaryCard({ label, value, color }) {
 }
 
 export default function DashboardScreen() {
-  const total   = PRODUCTS.length;
-  const empty   = PRODUCTS.filter(p => p.stock === 0).length;
-  const low     = PRODUCTS.filter(p => p.stock > 0 && p.stock <= 10).length;
-  const ok      = PRODUCTS.filter(p => p.stock > 10).length;
+  const total = PRODUCTS.length;
+  const empty = PRODUCTS.filter(p => p.stock === 0).length;
+  const low   = PRODUCTS.filter(p => p.stock > 0 && p.stock <= 10).length;
+  const ok    = PRODUCTS.filter(p => p.stock > 10).length;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.grid}>
-          <SummaryCard label="Total Produk" value={total}  color="#3498DB" />
-          <SummaryCard label="Stok Aman"    value={ok}     color="#1E8449" />
-          <SummaryCard label="Stok Menipis" value={low}    color="#B7770D" />
-          <SummaryCard label="Stok Habis"   value={empty}  color="#C0392B" />
+          <SummaryCard label="Total Produk" value={total} color="#3498DB" />
+          <SummaryCard label="Stok Aman"    value={ok}    color="#1E8449" />
+          <SummaryCard label="Stok Menipis" value={low}   color="#B7770D" />
+          <SummaryCard label="Stok Habis"   value={empty} color="#C0392B" />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -38,17 +40,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-  },
-  pageTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#888',
-    marginBottom: 20,
   },
   grid: {
     flexDirection: 'row',
