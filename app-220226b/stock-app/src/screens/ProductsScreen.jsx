@@ -36,7 +36,6 @@ export default function ProductsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Text style={styles.pageTitle}>Produk</Text>
       <FlatList
         data={products}
         keyExtractor={(item) => item.id}

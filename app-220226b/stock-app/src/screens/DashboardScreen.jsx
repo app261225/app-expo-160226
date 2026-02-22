@@ -20,9 +20,6 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.pageTitle}>Dashboard</Text>
-        <Text style={styles.subtitle}>Ringkasan stok hari ini</Text>
-
         <View style={styles.grid}>
           <SummaryCard label="Total Produk" value={total}  color="#3498DB" />
           <SummaryCard label="Stok Aman"    value={ok}     color="#1E8449" />
