@@ -2,8 +2,11 @@
   "expo": {
     "name": "fcm-push-demo",
     "slug": "fcm-push-demo",
+    "scheme": "fcm-push-demo",
     "version": "1.0.0",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -26,6 +29,7 @@
       "edgeToEdgeEnabled": true
     },
     "plugins": [
+      "expo-router",
       [
         "expo-notifications",
         {

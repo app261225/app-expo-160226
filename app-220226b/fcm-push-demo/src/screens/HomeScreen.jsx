@@ -23,6 +23,9 @@ export default function HomeScreen() {
    * Setiap tombol mengirim notifikasi dengan aksi berbeda.
    * Aksi baru terjadi saat notifikasi di-TAP, bukan saat dikirim.
    * Untuk test: minimize app dulu setelah tap tombol, lalu tap notifikasinya.
+   *
+   * Catatan Expo Router:
+   * - screen name pakai pathname: '/demo' bukan 'Demo'
    */
   const BUTTONS = [
     {
@@ -32,12 +35,12 @@ export default function HomeScreen() {
         notify('general', { body: 'Notifikasi biasa tanpa aksi.' }),
     },
     {
-      label: '📱 Navigate ke Demo',
+      label: '📱 Navigate ke Products',
       color: '#0077B6',
       onPress: () =>
-        notifyNavigate('Demo', { from: 'notification' }, {
-          title: '📱 Buka Demo Screen',
-          body: 'Tap untuk navigasi ke Demo Screen.',
+        notifyNavigate('/(tabs)/products', { from: 'notification' }, {
+          title: '📱 Buka Products',
+          body: 'Tap untuk navigasi ke Products.',
         }),
     },
     {
@@ -80,7 +83,7 @@ export default function HomeScreen() {
       color: '#457B9D',
       onPress: () =>
         notifyAutofill(
-          'Demo',
+          '/(tabs)/products',
           { name: 'Budi Santoso', email: 'budi@example.com', message: 'Diisi otomatis dari notifikasi!' },
           {
             title: '📝 Isi Form Otomatis',
@@ -124,7 +127,7 @@ function Btn({ label, color, onPress }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#1A1A2E',
+    backgroundColor: '#F5F5F5',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
@@ -134,12 +137,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#FFF',
+    color: '#111',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 12,
-    color: '#777',
+    color: '#888',
     marginBottom: 20,
     textAlign: 'center',
   },

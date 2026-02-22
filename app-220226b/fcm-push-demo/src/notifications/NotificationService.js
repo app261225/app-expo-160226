@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform, Linking, Alert } from 'react-native';
 import { CHANNELS, NOTIFICATION_TEMPLATES, NOTIFICATION_ACTIONS } from './notificationTypes';
-import { navigate } from '../navigation/navigationRef';
+import { router } from 'expo-router';
 
 // Singleton handler — dipanggil sekali oleh JS engine
 Notifications.setNotificationHandler({
@@ -95,7 +95,7 @@ const NotificationService = {
 
     [NOTIFICATION_ACTIONS.NAVIGATE]: (data) => {
       console.log('[Action] NAVIGATE →', data.screen, data.screenParams);
-      navigate(data.screen, data.screenParams ?? {});
+      router.push({ pathname: '/(tabs)/products', params: data.screenParams ?? {} });
     },
 
     [NOTIFICATION_ACTIONS.OPEN_URL]: async (data) => {
@@ -123,7 +123,6 @@ const NotificationService = {
         const response = await fetch(data.url, { method: data.method ?? 'GET' });
         const json = await response.json();
         console.log('[Action] FETCH result:', json);
-        // Tampilkan preview hasil fetch sebagai Alert
         Alert.alert(
           '✅ Data Berhasil Diambil',
           `ID: ${json.id}\nTitle: ${json.title ?? JSON.stringify(json).slice(0, 80)}`,
@@ -137,8 +136,10 @@ const NotificationService = {
 
     [NOTIFICATION_ACTIONS.AUTOFILL]: (data) => {
       console.log('[Action] AUTOFILL → screen:', data.screen, 'fields:', data.fields);
-      // Kirim fields sebagai screenParams — DemoScreen akan baca ini
-      navigate(data.screen, { autofill: data.fields });
+      router.push({
+        pathname: '/(tabs)/products',
+        params: { autofill: JSON.stringify(data.fields) },
+      });
     },
   },
 

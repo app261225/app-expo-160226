@@ -8,18 +8,22 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 /**
  * DemoScreen — screen tujuan dari aksi NAVIGATE dan AUTOFILL.
  *
- * Saat dibuka via notifikasi AUTOFILL, route.params.autofill berisi
- * object { name, email, message } yang langsung mengisi form.
+ * Saat dibuka via notifikasi AUTOFILL, params.autofill berisi
+ * JSON string { name, email, message } yang langsung mengisi form.
  *
  * Saat dibuka via notifikasi NAVIGATE biasa, form kosong.
  */
-export default function DemoScreen({ route }) {
-  const autofill = route?.params?.autofill ?? null;
-  const from = route?.params?.from ?? null;
+export default function DemoScreen() {
+  const params = useLocalSearchParams();
+
+  // autofill dikirim sebagai JSON string dari NotificationService
+  const autofillRaw = params?.autofill ?? null;
+  const from = params?.from ?? null;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,16 +32,21 @@ export default function DemoScreen({ route }) {
 
   /**
    * Jika screen dibuka dengan params autofill,
-   * isi semua field secara otomatis.
+   * parse JSON lalu isi semua field secara otomatis.
    */
   useEffect(() => {
-    if (autofill) {
-      setName(autofill.name ?? '');
-      setEmail(autofill.email ?? '');
-      setMessage(autofill.message ?? '');
-      setFilled(true);
+    if (autofillRaw) {
+      try {
+        const autofill = JSON.parse(autofillRaw);
+        setName(autofill.name ?? '');
+        setEmail(autofill.email ?? '');
+        setMessage(autofill.message ?? '');
+        setFilled(true);
+      } catch (e) {
+        console.warn('[DemoScreen] Gagal parse autofill:', e);
+      }
     }
-  }, [autofill]);
+  }, [autofillRaw]);
 
   const handleSubmit = () => {
     if (!name || !email) {
@@ -57,8 +66,8 @@ export default function DemoScreen({ route }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
 
-      {/* Banner info jika dibuka dari notifikasi */}
-      {from === 'notification' && !autofill && (
+      {/* Banner info jika dibuka dari notifikasi NAVIGATE */}
+      {from === 'notification' && !autofillRaw && (
         <View style={styles.banner}>
           <Text style={styles.bannerText}>📱 Dibuka dari notifikasi Navigate</Text>
         </View>
@@ -124,12 +133,12 @@ export default function DemoScreen({ route }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#1A1A2E',
+    backgroundColor: '#F5F5F5',
     padding: 24,
     gap: 16,
   },
   banner: {
-    backgroundColor: '#2A2A4E',
+    backgroundColor: '#EDE7F6',
     borderRadius: 8,
     padding: 12,
     borderLeftWidth: 3,
@@ -137,33 +146,34 @@ const styles = StyleSheet.create({
   },
   bannerSuccess: {
     borderLeftColor: '#2A9D8F',
+    backgroundColor: '#E0F2F1',
   },
   bannerText: {
-    color: '#CCC',
+    color: '#444',
     fontSize: 13,
   },
   title: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#FFF',
+    color: '#111',
     marginBottom: 8,
   },
   fieldGroup: {
     gap: 6,
   },
   label: {
-    color: '#AAA',
+    color: '#555',
     fontSize: 13,
     fontWeight: '600',
   },
   input: {
-    backgroundColor: '#2A2A4E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 14,
-    color: '#FFF',
+    color: '#111',
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#3A3A6E',
+    borderColor: '#DEDEDE',
   },
   inputMultiline: {
     minHeight: 100,

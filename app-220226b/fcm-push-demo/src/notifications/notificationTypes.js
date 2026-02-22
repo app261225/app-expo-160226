@@ -27,6 +27,9 @@ export const NOTIFICATION_ACTIONS = {
 /**
  * NOTIFICATION_TEMPLATES — template konten notifikasi per tipe.
  * params bisa override title, body, dan data tambahan.
+ *
+ * Catatan Expo Router:
+ * - screen menggunakan format pathname: '/demo', bukan 'Demo'
  */
 export const NOTIFICATION_TEMPLATES = {
   general: (params = {}) => ({
@@ -43,7 +46,7 @@ export const NOTIFICATION_TEMPLATES = {
     body: params.body ?? 'Tap untuk membuka halaman.',
     data: {
       action: NOTIFICATION_ACTIONS.NAVIGATE,
-      screen: params.screen ?? 'Demo',
+      screen: params.screen ?? '/demo',
       screenParams: params.screenParams ?? {},
       ...params.data,
     },
@@ -86,7 +89,7 @@ export const NOTIFICATION_TEMPLATES = {
     body: params.body ?? 'Tap untuk mengisi form otomatis.',
     data: {
       action: NOTIFICATION_ACTIONS.AUTOFILL,
-      screen: params.screen ?? 'Demo',
+      screen: params.screen ?? '/demo',
       fields: params.fields ?? {},
       ...params.data,
     },
