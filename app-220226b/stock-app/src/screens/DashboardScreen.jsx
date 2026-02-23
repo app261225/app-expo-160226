@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { PRODUCTS } from '../data/products';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { PRODUCTS, getStockStatus } from '../data/products';
 
 function SummaryCard({ label, value, color }) {
   return (
@@ -10,11 +11,24 @@ function SummaryCard({ label, value, color }) {
   );
 }
 
-export default function DashboardScreen() {
-  const total = PRODUCTS.length;
-  const empty = PRODUCTS.filter(p => p.stock === 0).length;
-  const low   = PRODUCTS.filter(p => p.stock > 0 && p.stock <= 10).length;
-  const ok    = PRODUCTS.filter(p => p.stock > 10).length;
+function NavButton({ label, icon, onPress }) {
+  return (
+    <TouchableOpacity
+      style={styles.navButton}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <Ionicons name={icon} size={28} color="#1E8449" />
+      <Text style={styles.navLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+export default function DashboardScreen({ onNavigate }) {
+  const total   = PRODUCTS.length;
+  const habis   = PRODUCTS.filter(p => getStockStatus(p) === 'habis').length;
+  const menipis = PRODUCTS.filter(p => getStockStatus(p) === 'menipis').length;
+  const aman    = PRODUCTS.filter(p => getStockStatus(p) === 'aman').length;
 
   return (
     <View style={styles.container}>
@@ -22,11 +36,21 @@ export default function DashboardScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <Text style={styles.sectionTitle}>Ringkasan Stok</Text>
         <View style={styles.grid}>
-          <SummaryCard label="Total Produk" value={total} color="#3498DB" />
-          <SummaryCard label="Stok Aman"    value={ok}    color="#1E8449" />
-          <SummaryCard label="Stok Menipis" value={low}   color="#B7770D" />
-          <SummaryCard label="Stok Habis"   value={empty} color="#C0392B" />
+          <SummaryCard label="Total Produk" value={total}   color="#3498DB" />
+          <SummaryCard label="Stok Aman"    value={aman}    color="#1E8449" />
+          <SummaryCard label="Stok Menipis" value={menipis} color="#B7770D" />
+          <SummaryCard label="Stok Habis"   value={habis}   color="#C0392B" />
+        </View>
+
+        <Text style={styles.sectionTitle}>Menu</Text>
+        <View style={styles.navGrid}>
+          <NavButton
+            label="Produk"
+            icon="cube-outline"
+            onPress={() => onNavigate('products')}
+          />
         </View>
       </ScrollView>
     </View>
@@ -40,6 +64,15 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#888',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginTop: 4,
   },
   grid: {
     flexDirection: 'row',
@@ -63,5 +96,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
     marginTop: 4,
+  },
+  navGrid: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  navButton: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    paddingVertical: 20,
+    alignItems: 'center',
+    gap: 8,
+    elevation: 2,
+  },
+  navLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#333',
   },
 });

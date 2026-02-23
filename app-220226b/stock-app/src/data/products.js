@@ -2,10 +2,13 @@
 // id, name, sku, category, unit
 // harga_modal_rp       — harga modal dalam Rupiah
 // harga_modal_non_rp   — harga modal dalam mata uang asing (nullable)
-// mata_uang_non_rp     — kode mata uang asing, misal 'USD', 'CNY' (nullable)
+// mata_uang_non_rp     — kode mata uang asing, misal 'USD', 'CNY', 'JPY' (nullable)
 // harga_jual           — harga jual dalam Rupiah
 // stock_minimal        — threshold stok menipis
 // stock                — stok saat ini
+//
+// Kurs referensi: 1 JPY = 150 IDR
+// Nilai JPY dibulatkan ke bilangan bulat (JPY tidak menggunakan desimal)
 
 export const PRODUCTS = [
   {
@@ -15,8 +18,8 @@ export const PRODUCTS = [
     category: 'Sembako',
     unit: 'karung',
     harga_modal_rp: 68000,
-    harga_modal_non_rp: null,
-    mata_uang_non_rp: null,
+    harga_modal_non_rp: 453,
+    mata_uang_non_rp: 'JPY',
     harga_jual: 78000,
     stock_minimal: 10,
     stock: 42,
@@ -28,8 +31,8 @@ export const PRODUCTS = [
     category: 'Sembako',
     unit: 'botol',
     harga_modal_rp: 28500,
-    harga_modal_non_rp: null,
-    mata_uang_non_rp: null,
+    harga_modal_non_rp: 190,
+    mata_uang_non_rp: 'JPY',
     harga_jual: 34000,
     stock_minimal: 12,
     stock: 18,
@@ -41,8 +44,8 @@ export const PRODUCTS = [
     category: 'Sembako',
     unit: 'bungkus',
     harga_modal_rp: 14000,
-    harga_modal_non_rp: null,
-    mata_uang_non_rp: null,
+    harga_modal_non_rp: 93,
+    mata_uang_non_rp: 'JPY',
     harga_jual: 17000,
     stock_minimal: 8,
     stock: 5,
@@ -54,8 +57,8 @@ export const PRODUCTS = [
     category: 'Kebersihan',
     unit: 'botol',
     harga_modal_rp: 9500,
-    harga_modal_non_rp: null,
-    mata_uang_non_rp: null,
+    harga_modal_non_rp: 63,
+    mata_uang_non_rp: 'JPY',
     harga_jual: 13000,
     stock_minimal: 6,
     stock: 0,
@@ -67,8 +70,8 @@ export const PRODUCTS = [
     category: 'Kebersihan',
     unit: 'bungkus',
     harga_modal_rp: 19000,
-    harga_modal_non_rp: null,
-    mata_uang_non_rp: null,
+    harga_modal_non_rp: 127,
+    mata_uang_non_rp: 'JPY',
     harga_jual: 24000,
     stock_minimal: 10,
     stock: 23,

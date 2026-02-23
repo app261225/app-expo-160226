@@ -1,9 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import {
   View,
   Text,
   FlatList,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -14,12 +13,11 @@ import { useNotify } from '../notifications/useNotify';
 
 // ─── Konstanta ────────────────────────────────────────────────────────────────
 
-const FILTERS = [
-  { key: 'semua',   label: 'Semua'   },
-  { key: 'aman',    label: 'Aman'    },
-  { key: 'menipis', label: 'Menipis' },
-  { key: 'habis',   label: 'Habis'   },
-];
+const FLAG_MAP = {
+  USD: '🇺🇸', JPY: '🇯🇵', CNY: '🇨🇳', SGD: '🇸🇬',
+  AUD: '🇦🇺', EUR: '🇪🇺', GBP: '🇬🇧', MYR: '🇲🇾',
+  THB: '🇹🇭', HKD: '🇭🇰',
+};
 
 const STATUS_COLOR = {
   aman:    { bg: '#E9F7EF', text: '#1E8449' },
@@ -28,53 +26,10 @@ const STATUS_COLOR = {
 };
 
 const STATUS_LABEL = {
-  aman:    'Aman',
-  menipis: 'Menipis',
-  habis:   'Habis',
+  aman: 'Aman', menipis: 'Menipis', habis: 'Habis',
 };
 
 // ─── Sub-komponen ─────────────────────────────────────────────────────────────
-
-function SearchBar({ value, onChangeText }) {
-  return (
-    <View style={styles.searchWrapper}>
-      <Ionicons name="search-outline" size={16} color="#888" style={styles.searchIcon} />
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Cari nama produk atau SKU..."
-        placeholderTextColor="#AAA"
-        value={value}
-        onChangeText={onChangeText}
-        returnKeyType="search"
-        clearButtonMode="while-editing"
-      />
-      {value.length > 0 && (
-        <TouchableOpacity onPress={() => onChangeText('')}>
-          <Ionicons name="close-circle" size={16} color="#AAA" />
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-}
-
-function FilterBar({ active, onSelect }) {
-  return (
-    <View style={styles.filterRow}>
-      {FILTERS.map(f => (
-        <TouchableOpacity
-          key={f.key}
-          style={[styles.filterBtn, active === f.key && styles.filterBtnActive]}
-          onPress={() => onSelect(f.key)}
-          activeOpacity={0.7}
-        >
-          <Text style={[styles.filterLabel, active === f.key && styles.filterLabelActive]}>
-            {f.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-}
 
 function StatusBadge({ status }) {
   const color = STATUS_COLOR[status];
@@ -87,52 +42,51 @@ function StatusBadge({ status }) {
   );
 }
 
-function ProductCard({ product, onStockIn, onStockOut }) {
+const ProductCard = memo(function ProductCard({ product, onStockIn, onStockOut }) {
   const status = getStockStatus(product);
 
   return (
     <View style={styles.card}>
-      {/* Header: SKU + Status */}
+
+      {/* Baris 1: SKU + Badge */}
       <View style={styles.cardHeader}>
         <Text style={styles.sku}>{product.sku}</Text>
         <StatusBadge status={status} />
       </View>
 
-      {/* Nama & Kategori */}
+      {/* Baris 2: Nama produk */}
       <Text style={styles.productName}>{product.name}</Text>
-      <Text style={styles.category}>{product.category}</Text>
 
-      <View style={styles.divider} />
-
-      {/* Harga */}
+      {/* Baris 3: Harga modal + jual inline */}
       <View style={styles.priceRow}>
-        <View style={styles.priceBlock}>
-          <Text style={styles.priceLabel}>Modal</Text>
-          <Text style={styles.priceValue}>{formatRp(product.harga_modal_rp)}</Text>
+        {/* Modal */}
+        <View style={styles.priceInline}>
+          <Ionicons name="calculator-outline" size={12} color="#AAA" />
+          <Text style={styles.priceInlineValue}>{formatRp(product.harga_modal_rp)}</Text>
           {product.harga_modal_non_rp !== null && (
-            <Text style={styles.priceNonRp}>
-              {product.mata_uang_non_rp} {product.harga_modal_non_rp.toLocaleString('id-ID')}
+            <Text style={styles.priceFlag}>
+              {FLAG_MAP[product.mata_uang_non_rp] ?? product.mata_uang_non_rp}
+              {' '}{product.harga_modal_non_rp.toLocaleString('id-ID')}
             </Text>
           )}
         </View>
-        <View style={styles.priceBlock}>
-          <Text style={styles.priceLabel}>Jual</Text>
-          <Text style={[styles.priceValue, styles.priceJual]}>
+
+        <Text style={styles.priceSep}>·</Text>
+
+        {/* Jual */}
+        <View style={styles.priceInline}>
+          <Ionicons name="storefront-outline" size={12} color="#1E8449" />
+          <Text style={[styles.priceInlineValue, styles.priceJual]}>
             {formatRp(product.harga_jual)}
           </Text>
         </View>
       </View>
 
-      <View style={styles.divider} />
-
-      {/* Stok */}
+      {/* Baris 4: Stok minimal + kontrol stok */}
       <View style={styles.stockRow}>
-        <View>
-          <Text style={styles.stockLabel}>Stok Minimal</Text>
-          <Text style={styles.stockMinimal}>
-            {product.stock_minimal} {product.unit}
-          </Text>
-        </View>
+        <Text style={styles.stockMinimal}>
+          min {product.stock_minimal} {product.unit}
+        </Text>
         <View style={styles.stockActions}>
           <TouchableOpacity
             style={[styles.stockBtn, styles.stockBtnOut, product.stock === 0 && styles.stockBtnDisabled]}
@@ -140,11 +94,12 @@ function ProductCard({ product, onStockIn, onStockOut }) {
             disabled={product.stock === 0}
             activeOpacity={0.7}
           >
-            <Ionicons name="remove" size={14} color={product.stock === 0 ? '#CCC' : '#C0392B'} />
+            <Ionicons name="remove" size={13} color={product.stock === 0 ? '#CCC' : '#C0392B'} />
           </TouchableOpacity>
 
           <Text style={styles.stockValue}>
-            {product.stock} <Text style={styles.stockUnit}>{product.unit}</Text>
+            {product.stock}{' '}
+            <Text style={styles.stockUnit}>{product.unit}</Text>
           </Text>
 
           <TouchableOpacity
@@ -152,37 +107,20 @@ function ProductCard({ product, onStockIn, onStockOut }) {
             onPress={() => onStockIn(product)}
             activeOpacity={0.7}
           >
-            <Ionicons name="add" size={14} color="#1E8449" />
+            <Ionicons name="add" size={13} color="#1E8449" />
           </TouchableOpacity>
         </View>
       </View>
+
     </View>
   );
-}
+});
 
 // ─── Screen utama ─────────────────────────────────────────────────────────────
 
 export default function ProductsScreen() {
-  const [products, setProducts]   = useState(PRODUCTS);
-  const [search, setSearch]       = useState('');
-  const [filter, setFilter]       = useState('semua');
-  const { notify }                = useNotify();
-
-  // Derived list — dihitung ulang hanya saat search/filter/products berubah
-  const filteredProducts = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return products.filter(p => {
-      const matchSearch =
-        q === '' ||
-        p.name.toLowerCase().includes(q) ||
-        p.sku.toLowerCase().includes(q);
-
-      const matchFilter =
-        filter === 'semua' || getStockStatus(p) === filter;
-
-      return matchSearch && matchFilter;
-    });
-  }, [products, search, filter]);
+  const [products, setProducts] = useState(PRODUCTS);
+  const { notify }              = useNotify();
 
   const handleStockIn = useCallback((product) => {
     setProducts(prev =>
@@ -205,224 +143,105 @@ export default function ProductsScreen() {
     });
   }, [notify]);
 
-  const handleTambah = useCallback(() => {
-    // Placeholder — akan diisi form tambah produk di iterasi berikutnya
-    Alert.alert('Tambah Produk', 'Fitur form tambah produk belum tersedia.');
-  }, []);
-
   return (
-    <View style={styles.container}>
-
-      {/* Search */}
-      <View style={styles.topSection}>
-        <SearchBar value={search} onChangeText={setSearch} />
-
-        {/* Filter */}
-        <FilterBar active={filter} onSelect={setFilter} />
-
-        {/* Counter + Tombol Tambah */}
-        <View style={styles.infoRow}>
-          <Text style={styles.countText}>
-            {filteredProducts.length} produk ditampilkan
-          </Text>
-          <TouchableOpacity
-            style={styles.addBtn}
-            onPress={handleTambah}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="add" size={16} color="#FFF" />
-            <Text style={styles.addBtnText}>Tambah</Text>
-          </TouchableOpacity>
+    <FlatList
+      data={products}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <ProductCard
+          product={item}
+          onStockIn={handleStockIn}
+          onStockOut={handleStockOut}
+        />
+      )}
+      contentContainerStyle={styles.list}
+      showsVerticalScrollIndicator={false}
+      initialNumToRender={7}
+      maxToRenderPerBatch={7}
+      windowSize={5}
+      removeClippedSubviews={true}
+      ListEmptyComponent={
+        <View style={styles.emptyWrapper}>
+          <Ionicons name="cube-outline" size={48} color="#CCC" />
+          <Text style={styles.emptyText}>Tidak ada produk.</Text>
         </View>
-      </View>
-
-      {/* List */}
-      <FlatList
-        data={filteredProducts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            onStockIn={handleStockIn}
-            onStockOut={handleStockOut}
-          />
-        )}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyWrapper}>
-            <Ionicons name="cube-outline" size={48} color="#CCC" />
-            <Text style={styles.emptyText}>Tidak ada produk ditemukan.</Text>
-          </View>
-        }
-      />
-    </View>
+      }
+    />
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-
-  // ── Top section
-  topSection: {
-    backgroundColor: '#FFF',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ECECEC',
-  },
-  searchWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 10,
-  },
-  searchIcon: {
-    marginRight: 6,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#111',
-    padding: 0,
-  },
-
-  // ── Filter
-  filterRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 10,
-  },
-  filterBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: '#F0F0F0',
-  },
-  filterBtnActive: {
-    backgroundColor: '#1E8449',
-  },
-  filterLabel: {
-    fontSize: 13,
-    color: '#555',
-    fontWeight: '500',
-  },
-  filterLabelActive: {
-    color: '#FFF',
-  },
-
-  // ── Info row
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  countText: {
-    fontSize: 12,
-    color: '#888',
-  },
-  addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1E8449',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    gap: 4,
-  },
-  addBtnText: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-
-  // ── List
   list: {
-    padding: 16,
-    gap: 12,
+    padding: 12,
+    gap: 8,
   },
 
   // ── Card
   card: {
     backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 14,
-    elevation: 2,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    elevation: 1,
+    gap: 5,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
   },
   sku: {
-    fontSize: 11,
-    color: '#888',
+    fontSize: 10,
+    color: '#AAA',
     fontFamily: 'monospace',
     letterSpacing: 0.5,
   },
   productName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
     color: '#111',
-    marginBottom: 2,
-  },
-  category: {
-    fontSize: 12,
-    color: '#999',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#F0F0F0',
-    marginVertical: 10,
   },
 
   // ── Badge
   badge: {
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    borderRadius: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
   },
   badgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
 
-  // ── Harga
+  // ── Harga inline
   priceRow: {
     flexDirection: 'row',
-    gap: 24,
+    alignItems: 'center',
+    gap: 6,
   },
-  priceBlock: {
-    flex: 1,
+  priceInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
-  priceLabel: {
-    fontSize: 11,
-    color: '#AAA',
-    marginBottom: 2,
-  },
-  priceValue: {
-    fontSize: 13,
+  priceInlineValue: {
+    fontSize: 12,
     fontWeight: '600',
-    color: '#333',
+    color: '#555',
   },
   priceJual: {
     color: '#1E8449',
   },
-  priceNonRp: {
+  priceFlag: {
     fontSize: 11,
     color: '#AAA',
-    marginTop: 1,
+    marginLeft: 2,
+  },
+  priceSep: {
+    fontSize: 12,
+    color: '#CCC',
   },
 
   // ── Stok
@@ -430,26 +249,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  stockLabel: {
-    fontSize: 11,
-    color: '#AAA',
-    marginBottom: 2,
+    marginTop: 2,
   },
   stockMinimal: {
-    fontSize: 13,
-    color: '#555',
-    fontWeight: '500',
+    fontSize: 11,
+    color: '#BBB',
   },
   stockActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   stockBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -463,19 +277,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   stockValue: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
     color: '#111',
-    minWidth: 40,
+    minWidth: 36,
     textAlign: 'center',
   },
   stockUnit: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '400',
     color: '#888',
   },
 
-  // ── Empty state
+  // ── Empty
   emptyWrapper: {
     alignItems: 'center',
     paddingTop: 60,

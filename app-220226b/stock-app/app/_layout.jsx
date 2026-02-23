@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LogBox } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NotificationProvider } from '../src/notifications/NotificationProvider';
 import ablyClient from '../src/ably/ablyClient';
 
@@ -9,23 +11,26 @@ LogBox.ignoreLogs([
   '`expo-notifications` functionality is not fully supported',
 ]);
 
-ablyClient.connection.on('connected', () => {
-  console.log('[Ably] Terhubung ✓');
-});
-
-ablyClient.connection.on('failed', (err) => {
-  console.error('[Ably] Koneksi gagal:', err);
-});
-
 export default function RootLayout() {
+  useEffect(() => {
+    const onConnected = () => console.log('[Ably] Terhubung ✓');
+    const onFailed = (err) => console.error('[Ably] Koneksi gagal:', err);
+    ablyClient.connection.on('connected', onConnected);
+    ablyClient.connection.on('failed', onFailed);
+    return () => {
+      ablyClient.connection.off('connected', onConnected);
+      ablyClient.connection.off('failed', onFailed);
+    };
+  }, []);
+
   return (
-    <NotificationProvider>
-      {/* translucent={false} → Android reservasi ruang status bar,
-          konten tidak akan render di balik status bar */}
-      <StatusBar style="dark" backgroundColor="#F5F5F5" translucent={false} />
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-    </NotificationProvider>
+    <SafeAreaProvider>
+      <NotificationProvider>
+        <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
+        <Stack screenOptions={{ headerShown: false, animation: 'none' }}>
+          <Stack.Screen name="index" />
+        </Stack>
+      </NotificationProvider>
+    </SafeAreaProvider>
   );
 }

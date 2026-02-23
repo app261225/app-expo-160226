@@ -12,3 +12,7 @@ tab:products{
     card bisa di klik untuk edit (form edit sama dengan form tambah) + ada tombol hapus & tombol riwayat {in/out} product itu
     
 }
+
+tab:log{
+    sku, nama produk, nama pengguna, type log (in / out), qty, stamp, notes (optional)
+}
