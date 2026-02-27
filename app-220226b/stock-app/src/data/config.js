@@ -70,3 +70,19 @@ export function formatForeign(amount, currencyCode, currencies = DEFAULT_CURRENC
 export function formatRp(amount) {
   return 'Rp ' + amount.toLocaleString('id-ID');
 }
+// ─── Flag emoji per kode mata uang ───────────────────────────────────────────
+// Tambah atau hapus entry sesuai kebutuhan.
+// Konvensi: key = kode ISO 4217, value = Unicode regional indicator emoji.
+
+export const FLAG_MAP = {
+  USD: '🇺🇸',
+  JPY: '🇯🇵',
+  CNY: '🇨🇳',
+  SGD: '🇸🇬',
+  AUD: '🇦🇺',
+  EUR: '🇪🇺',
+  GBP: '🇬🇧',
+  MYR: '🇲🇾',
+  THB: '🇹🇭',
+  HKD: '🇭🇰',
+};
